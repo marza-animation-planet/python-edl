@@ -12,11 +12,8 @@ class EDLTestCase(unittest.TestCase):
 
     def test_init_valid_fps(self):
         def verify_valid_framerate(fps_):
-            try:
-                edl = EDL(fps_)
-            except (TypeError, ValueError), e:
-                self.fail("Valid value {} raised {} on init".format(fps_, e.__class__.__name__))
-            self.assertIsInstance(edl, EDL)
+            edl = EDL(fps_)
+
             if isinstance(fps_, basestring):
                 # No try/except here; we expect this value to be valid.
                 fps_ = float(fps_)
