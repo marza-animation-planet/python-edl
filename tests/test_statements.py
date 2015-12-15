@@ -1,5 +1,5 @@
 import unittest
-from edl.event import Statement, Title, StatementError
+from edl.event import Statement, Title, FrameCodeMode, StatementError
 
 
 class BaseStatementTests(unittest.TestCase):
@@ -99,7 +99,7 @@ class TitleStatementTests(unittest.TestCase):
             self.assertEqual(test_title, title.title)
 
     def test_assign_invalid_titles(self):
-        """Verify that assigning invalid titles raises StatementErrors"""
+        """Verify that assigning invalid titles raises correct exceptions"""
         def assign_value(obj, value):
             assert(isinstance(obj, Title))
             obj.title = value
@@ -111,3 +111,82 @@ class TitleStatementTests(unittest.TestCase):
                 expected_exc = TypeError
             title = Title()
             self.assertRaises(expected_exc, assign_value, title, test_title)
+
+
+class FrameCodeModeStatementTests(unittest.TestCase):
+    """Test cases for Frame Code Mode Statement class
+    """
+
+    valid_statements = [
+        "FCM: DROP FRAME",
+        "FCM: NON DROP FRAME",
+        " FCM:DROP FRAME ",
+        " FCM:  NON DROP FRAME"
+    ]
+
+    invalid_statements = [
+        # Colon is required for identifier
+        "FCM DROP FRAME",
+        # Identifier must be all-caps
+        "Fcm: DROP FRAME",
+        # Values must be all-caps:
+        "FCM: Drop Frame",
+        "FCM: Non Drop Frame",
+        "This is not an FCM statement",
+        # Ignoring next case for now, as we're able to parse it correctly, and
+        # it will be corrected if we re-write the file.
+        # "FCM: DROP FRAME  ."
+    ]
+
+    valid_values = [True, False]
+    invalid_values = [
+        1234,
+        1234.567,
+        dict(),
+        tuple(),
+        list(),
+        # While expected displayed values, not helpful as general data
+        "DROP FRAME",
+        "NON DROP FRAME"
+    ]
+
+    def test_parse_valid_fcm(self):
+        """Verify that valid FCM statements parse correctly"""
+        for test_fcm in self.valid_statements:
+            expected_value = "NON" not in test_fcm
+            if expected_value:
+                expected_str = "FCM: DROP FRAME"
+            else:
+                expected_str = "FCM: NON DROP FRAME"
+
+            fcm = FrameCodeMode(test_fcm)
+            self.assertEqual(expected_value, fcm.isDropFrame)
+            self.assertEqual(expected_str, str(fcm))
+
+    def test_parse_invalid_fcm(self):
+        """Verify that invalid FCM statements raise StatementErrors"""
+        for test_fcm in self.invalid_statements:
+            self.assertRaises(StatementError, FrameCodeMode, test_fcm)
+
+    def test_assign_valid_values(self):
+        """Verify that assigning valid values works"""
+        for test_fcm in self.valid_values:
+            if test_fcm:
+                expected_str = "FCM: DROP FRAME"
+            else:
+                expected_str = "FCM: NON DROP FRAME"
+            fcm = FrameCodeMode()
+            fcm.isDropFrame = test_fcm
+
+            self.assertEqual(test_fcm, fcm.isDropFrame)
+            self.assertEqual(expected_str, str(fcm))
+
+    def test_assign_invalid_values(self):
+        """Verify that assigning invalid titles raises correct exceptions"""
+        def assign_value(obj, value):
+            assert(isinstance(obj, FrameCodeMode))
+            obj.isDropFrame = value
+
+        for test_fcm in self.invalid_values:
+            fcm = FrameCodeMode()
+            self.assertRaises(TypeError, assign_value, fcm, test_fcm)

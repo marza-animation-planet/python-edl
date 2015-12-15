@@ -261,3 +261,43 @@ class Title(Statement):
         if len(value) > 70:
             raise ValueError("Title length must be no more than 70 characters")
         self._title = value
+
+
+class FrameCodeMode(Statement):
+    """A Frame Code Mode (FCM) Statement as defined by the CMX standard.
+    """
+
+    _identifier = "FCM:"
+    _regex = re.compile("FCM:(\s+)?(?P<mode>(?:NON\s)?DROP\sFRAME)")
+    DROP_FRAME = "DROP FRAME"
+    NON_DROP_FRAME = "NON DROP FRAME"
+
+    def __init__(self, raw_text=None):
+        super(FrameCodeMode, self).__init__(raw_text)
+        self._isDropFrame = False
+
+        if self.raw:
+            self._parse(self.raw)
+
+    def __str__(self):
+        return " ".join([self._identifier, self._field_text])
+
+    def _parse(self, raw_text):
+        try:
+            self._isDropFrame = self.DROP_FRAME == self._regex.search(raw_text).group('mode')
+        except (AttributeError, TypeError):
+            raise StatementError("Statement is not a valid FCM:\n\t\"{}\"".format(raw_text))
+
+    @property
+    def _field_text(self):
+        return self.DROP_FRAME if self.isDropFrame else self.NON_DROP_FRAME
+
+    @property
+    def isDropFrame(self):
+        return self._isDropFrame
+
+    @isDropFrame.setter
+    def isDropFrame(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("isDropFrame must be a bool")
+        self._isDropFrame = value
