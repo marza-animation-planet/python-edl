@@ -242,6 +242,22 @@ class Title(Statement):
 
     def _parse(self, raw_text):
         try:
-            self._title = self._regex.search(raw_text).group('title')
+            title = self._regex.search(raw_text).group('title')
         except (AttributeError, TypeError):
-            raise StatementError("Statement is not a valid Title:\n\t\"{}\"".format(raw_text))
+            raise StatementError("Statement is not a valid Title statement:\n\t\"{}\"".format(raw_text))
+        # Bypass the title-setting safeguards. For now we'll assume that
+        # data read from an EDL file is authoritative. This may come back to
+        # bite us, of course.
+        self._title = title
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        if not isinstance(value, basestring):
+            raise TypeError("Title must be a string")
+        if len(value) > 70:
+            raise ValueError("Title length must be no more than 70 characters")
+        self._title = value
