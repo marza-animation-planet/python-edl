@@ -1,3 +1,4 @@
+import re
 from .effects import Cut, Timewarp
 
 
@@ -185,15 +186,62 @@ class Event(object):
         return self.aux
 
 
+class StatementError(Exception):
+    """Exception for Statement errors
+    """
+
+
 class Statement(object):
     """Base class for Event statements
     """
+    _identifier = None
+    _regex = None
 
     def __init__(self, raw_text=None):
+        if (raw_text is not None) and (not isinstance(raw_text, basestring)):
+            raise TypeError("Raw statement data must be a string")
         self._prev_statement = None
         self._next_statement = None
         self._raw = raw_text
-        self._identifier = None
+        # Don't call _parse in base init to prevent subclass overrides from
+        # setting values in their super call, then stomping them with their
+        # instance variable setup. Could put the super at the end of subclass
+        # inits, but then get into wonky dependency ordering.
 
     def __str__(self):
+        # ToDo: Format output "columns" to use StandardForm as base alignment.
+        # See spec Appendices E and F (pg. 53-57) for examples.
         return self._raw
+
+    def _parse(self, raw_text):
+        """Parse raw data and update fields.
+        :type basestring raw_text: Raw text data for statement
+        """
+
+    @property
+    def raw(self):
+        return self._raw
+
+
+class Title(Statement):
+    """A Title Statement as defined by the CMX standard.
+    """
+
+    _identifier = "TITLE:"
+    _regex = re.compile("TITLE:\s?(?P<title>.+)")
+
+    def __init__(self, raw_text=None):
+        super(Title, self).__init__(raw_text)
+        self._title = None
+
+        if self.raw:
+            self._parse(self.raw)
+
+    def __str__(self):
+        return " ".join([self._identifier, self._title if self._title else ""])
+
+    def _parse(self, raw_text):
+        try:
+            self._title = self._regex.search(raw_text).group('title')
+        except (AttributeError, TypeError):
+            raise StatementError("Statement is not a valid Title:\n\t\"{}\"".format(raw_text))
