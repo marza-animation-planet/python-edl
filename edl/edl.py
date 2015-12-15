@@ -1,5 +1,5 @@
-import collections
-import pprint
+# import collections
+# import pprint
 from .event import Event
 from .matchers import TitleMatcher, EventMatcher, EffectMatcher, NameMatcher, \
     SourceMatcher, TimewarpMatcher, CommentMatcher
@@ -64,6 +64,34 @@ class EDL(object):
     def __len__(self):
         return len(self.events)
 
+    @classmethod
+    def from_file(cls, fps, file_):
+        # ToDO: handle both files and filepaths
+        with open(file_) as f:
+            data = f.readlines()
+        return cls._parse(fps, data)
+
+    @classmethod
+    def from_string(cls, fps, text):
+        # ToDo: handle files with CRLF endings
+        data = text.split('\n')
+        return cls._parse(fps, data)
+
+    @classmethod
+    def _parse(cls, fps, data):
+        edl = EDL(fps)
+        matchers = [TitleMatcher(), EventMatcher(fps), EffectMatcher(),
+                    NameMatcher(), SourceMatcher(), TimewarpMatcher(fps),
+                    CommentMatcher()]
+        for line in data:
+            line = line.rstrip('\n')  # Remove trailing newlines, usu. from files
+            if line:  # Only spend cycles on lines with data
+                for m in matchers:
+                    if m.apply(edl, line):
+                        break
+
+        return edl
+
     def get_start(self):
         start_tc = None
         for e in self.events:
@@ -125,39 +153,3 @@ class EDL(object):
             output_buffer.append(event.to_string())
             # output_buffer.append('')
         return '\n'.join(output_buffer)
-
-
-class Parser(object):
-    """No documentation for this class yet.
-    """
-
-    default_fps = "25.0"
-
-    def __init__(self, fps=None):
-        if fps is None:
-            self.fps = self.default_fps
-        else:
-            self.fps = fps
-
-        self._matchers = [TitleMatcher(),
-                          EventMatcher(self.fps),
-                          EffectMatcher(),
-                          NameMatcher(),
-                          SourceMatcher(),
-                          TimewarpMatcher(self.fps),
-                          CommentMatcher()]
-
-    def parse(self, input_):
-        stack = None
-        if isinstance(input_, str):
-            input_ = input_.splitlines(True)
-        if isinstance(input_, collections.Iterable):
-            stack = EDL(self.fps)
-            for l in input_:
-                l = l.rstrip('\n')  # Remove trailing newlines, usu. from files
-                if l:  # Only spend cycles on lines with data
-                    for m in self._matchers:
-                        if m.apply(stack, l):
-                            break
-        pprint.PrettyPrinter(indent=4)
-        return stack

@@ -3,7 +3,7 @@
 import sys
 import unittest
 # from itertools import izip_longest
-from edl import EDL  # , Parser
+from edl import EDL
 
 
 class EDLTestCase(unittest.TestCase):
@@ -76,12 +76,9 @@ class EDLTestCase(unittest.TestCase):
     # def testing_to_edl_method_will_output_the_standard_edl_case1(self):
     #     """testing if to_string will output the EDL as string
     #     """
-    #     p = Parser('24')
     #     with open('../tests/test_data/test_24.edl') as f:
     #         expected_edl = [line.rstrip('\n') for line in f.readlines()]
-    #         # Reset to beginning of file and read into new EDL
-    #         f.seek(0)
-    #         actual_edl = p.parse(f).to_string().split('\n')
+    #     actual_edl = EDL.from_file(24, '../tests/test_data/test_24.edl')
     #
     #     # Remove blank lines, since they don't affect data content
     #     expected_edl = [line for line in expected_edl if line]
@@ -105,10 +102,7 @@ class EDLTestCase(unittest.TestCase):
     # def testing_to_edl_method_will_output_the_standard_edl_case2(self):
     #     """testing if to_string will output the EDL as string
     #     """
-    #     p = Parser('24')
-    #     with open('../tests/test_data/test.edl') as f:
-    #         s = p.parse(f)
-    #
+    #     s = EDL.from_file(24, '../tests/test_data/test.edl')
     #     with open('../tests/test_data/test.edl') as f:
     #         expected_edl = f.readlines()
     #
@@ -122,10 +116,7 @@ class EDLTestCase(unittest.TestCase):
     # def testing_to_edl_method_will_output_the_standard_edl_case3(self):
     #     """testing if to_string will output the EDL as string
     #     """
-    #     p = Parser('24')
-    #     with open('../tests/test_data/test_50.edl') as f:
-    #         s = p.parse(f)
-    #
+    #     s = EDL.from_file(24, '../tests/test_data/test_50.edl')
     #     with open('../tests/test_data/test_50.edl') as f:
     #         expected_edl = f.readlines()
     #

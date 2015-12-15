@@ -3,6 +3,6 @@
 Python EDL parsing library
 """
 
-from edl import EDL, Parser
+from edl import EDL
 
-__version__ = '0.1.12'
+__version__ = '0.2.00'
