@@ -16,14 +16,37 @@ class EDL(object):
       >>> l[0]
       <edl.edl.Event object at 0x7fb630564490>
 
-    :param str fps: The frame per second setting for for this EDL. Should be a
+    :param basestring, int, float fps: The frame per second setting for for this EDL. Should be a
       string one of ['23.98', '24', '25', '29.97', '30', '50', '59.94', '60'].
       `fps` can not be skipped.
     """
 
+    _supported_framerates = ['23.98', '24', '25', '29.97', '30', '50', '59.94', '60']
+
     def __init__(self, fps):
-        self.events = []
+        if not isinstance(fps, (basestring, int, float)):
+            raise TypeError("Type {} not supported for fps".format(fps.__class__.__name__))
+
+        # Convert to float to make sure float strings will be accepted
+        if isinstance(fps, basestring):
+            try:
+                fps = float(fps)
+            except ValueError:
+                raise ValueError("{} is not a valid framerate".format(fps))
+
+        # Convert number types to strings for comparison. Reduces accidentally
+        # including invalid rates by floating-point rounding. Still some margin
+        # of error, but so small it should be safely ignorable.
+        if isinstance(fps, float):
+            fps = str(int(fps)) if fps.is_integer() else str(fps)
+        elif isinstance(fps, int):
+            fps = str(fps)
+
+        if fps not in self._supported_framerates:
+            raise ValueError("Framerate {} is not supported.".format(fps))
+
         self.fps = fps
+        self.events = []
         self.title = ''
 
     def __getitem__(self, i):
