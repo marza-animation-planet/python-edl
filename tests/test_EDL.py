@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import os
 import sys
 import unittest
-# from itertools import izip_longest
+from itertools import izip_longest
 from edl import EDL
 
 
@@ -73,56 +73,27 @@ class EDLTestCase(unittest.TestCase):
         for fps in [None, ['24'], (29.97, 30), {'fps': 30}]:
             verify_invalid_framerate(fps)
 
-    # def testing_to_edl_method_will_output_the_standard_edl_case1(self):
-    #     """testing if to_string will output the EDL as string
-    #     """
-    #     with open('../tests/test_data/test_24.edl') as f:
-    #         expected_edl = [line.rstrip('\n') for line in f.readlines()]
-    #     actual_edl = EDL.from_file(24, '../tests/test_data/test_24.edl')
-    #
-    #     # Remove blank lines, since they don't affect data content
-    #     expected_edl = [line for line in expected_edl if line]
-    #     actual_edl = [line for line in actual_edl if line]
-    #
-    #     self.maxDiff = None
-    #
-    #     self.assertEqual(len(expected_edl), len(actual_edl),
-    #                      "Generated EDL has the same number of data lines as "
-    #                      "original EDL.")
-    #
-    #     for expected, actual in izip_longest(expected_edl, actual_edl):
-    #         # Remove extraneous whitespace to prevent false negatives
-    #         expected = " ".join(expected.split())
-    #         actual = " ".join(actual.split())
-    #
-    #         self.assertEqual(expected, actual, "Generated EDL line is the same"
-    #                                            "as original EDL line.")
-    #
-    #
-    # def testing_to_edl_method_will_output_the_standard_edl_case2(self):
-    #     """testing if to_string will output the EDL as string
-    #     """
-    #     s = EDL.from_file(24, '../tests/test_data/test.edl')
-    #     with open('../tests/test_data/test.edl') as f:
-    #         expected_edl = f.readlines()
-    #
-    #     print s.to_string()
-    #
-    #     self.assertEqual(
-    #         ''.join(expected_edl),
-    #         s.to_string()
-    #     )
-    #
-    # def testing_to_edl_method_will_output_the_standard_edl_case3(self):
-    #     """testing if to_string will output the EDL as string
-    #     """
-    #     s = EDL.from_file(24, '../tests/test_data/test_50.edl')
-    #     with open('../tests/test_data/test_50.edl') as f:
-    #         expected_edl = f.readlines()
-    #
-    #     print s.to_string()
-    #
-    #     self.assertEqual(
-    #         ''.join(expected_edl),
-    #         s.to_string()
-    #     )
+    def test_output_matches_input(self):
+        """testing if to_string will output the EDL as string
+        """
+        for test_file in ['test_24.edl', 'test.edl', 'test_50.edl']:
+            test_fpath = os.path.join("..", "tests", "test_data", test_file)
+            with open(test_fpath) as f:
+                expected_edl = [line.rstrip('\n') for line in f.readlines()]
+            actual_edl = EDL.from_file(24, test_fpath)
+
+            # Remove blank lines, since they don't affect data content
+            expected_edl = [line for line in expected_edl if line]
+            actual_edl = [str(statement) for statement in actual_edl if statement]
+
+            self.maxDiff = None
+
+            self.assertEqual(len(expected_edl), len(actual_edl),
+                             "Generated EDL has the same number of data lines as original EDL.")
+
+            for expected, actual in izip_longest(expected_edl, actual_edl):
+                # Remove extraneous whitespace to prevent false negatives
+                expected = " ".join(expected.split())
+                actual = " ".join(actual.split())
+
+                self.assertEqual(expected, actual, "Generated EDL line is the same as original EDL line.")

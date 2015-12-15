@@ -1,8 +1,9 @@
 # import collections
 # import pprint
 from .event import Event
-from .matchers import TitleMatcher, EventMatcher, EffectMatcher, NameMatcher, \
-    SourceMatcher, TimewarpMatcher, CommentMatcher
+# from .matchers import TitleMatcher, EventMatcher, EffectMatcher, NameMatcher, \
+#     SourceMatcher, TimewarpMatcher, CommentMatcher
+from .event import Statement
 
 
 class EDL(object):
@@ -80,15 +81,16 @@ class EDL(object):
     @classmethod
     def _parse(cls, fps, data):
         edl = EDL(fps)
-        matchers = [TitleMatcher(), EventMatcher(fps), EffectMatcher(),
-                    NameMatcher(), SourceMatcher(), TimewarpMatcher(fps),
-                    CommentMatcher()]
+        # matchers = [TitleMatcher(), EventMatcher(fps), EffectMatcher(),
+        #             NameMatcher(), SourceMatcher(), TimewarpMatcher(fps),
+        #             CommentMatcher()]
         for line in data:
             line = line.rstrip('\n')  # Remove trailing newlines, usu. from files
             if line:  # Only spend cycles on lines with data
-                for m in matchers:
-                    if m.apply(edl, line):
-                        break
+                edl.events.append(Statement(line))
+                # for m in matchers:
+                #     if m.apply(edl, line):
+                #         break
 
         return edl
 
@@ -150,6 +152,6 @@ class EDL(object):
         # for each Event call their to_string() method and gather the output
         output_buffer = ['TITLE: %s' % self.title, '']
         for event in self.events:
-            output_buffer.append(event.to_string())
+            output_buffer.append(str(event))
             # output_buffer.append('')
         return '\n'.join(output_buffer)

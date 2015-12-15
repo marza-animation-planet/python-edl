@@ -183,3 +183,17 @@ class Event(object):
 
     def get_aux(self):
         return self.aux
+
+
+class Statement(object):
+    """Base class for Event statements
+    """
+
+    def __init__(self, raw_text=None):
+        self._prev_statement = None
+        self._next_statement = None
+        self._raw = raw_text
+        self._identifier = None
+
+    def __str__(self):
+        return self._raw
