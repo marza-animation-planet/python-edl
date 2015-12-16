@@ -10,6 +10,10 @@ class EDLTestCase(unittest.TestCase):
     """tests the edl.edl.List class
     """
 
+    NTSC_non_drop_rates = ['24', '30', '60']
+    NTSC_drop_rates = ['23.98', '29.97', '59.94']
+    PAL_rates = ['25', '50']
+
     def test_init_valid_fps(self):
         def verify_valid_framerate(fps_):
             edl = EDL(fps_)
@@ -69,6 +73,44 @@ class EDLTestCase(unittest.TestCase):
         # Test invalid types
         for fps in [None, ['24'], (29.97, 30), {'fps': 30}]:
             verify_invalid_framerate(fps)
+
+    def test_NTSC_PAL_identification(self):
+        """Test that EDL correctly identifies current framerate as NTSC or PAL.
+        """
+        for ntsc in (self.NTSC_non_drop_rates + self.NTSC_drop_rates):
+            edl = EDL(ntsc)
+            self.assertTrue(edl.isNTSC)
+            self.assertFalse(edl.isPAL)
+
+        for pal in self.PAL_rates:
+            edl = EDL(pal)
+            self.assertTrue(edl.isPAL)
+            self.assertFalse(edl.isNTSC)
+
+        # EDLs can only be created with supported framerates, so we don't
+        # need to test for invalid rates.
+
+    def test_drop_frame_conversion(self):
+        """Test that NTSC framerates convert between dropframe and nondropframe
+         correctly, and that PAL framerates ignore dropframe conversions.
+        """
+
+
+        for non_drop, drop in zip(self.NTSC_non_drop_rates, self.NTSC_drop_rates):
+            non_drop_edl = EDL(non_drop)
+            drop_edl = EDL(drop)
+
+            self.assertEqual(non_drop, non_drop_edl.nonDropFrameRate)
+            self.assertEqual(drop, non_drop_edl.dropFrameRate)
+            self.assertEqual(non_drop, drop_edl.nonDropFrameRate)
+            self.assertEqual(drop, drop_edl.dropFrameRate)
+            self.assertEqual(non_drop_edl.nonDropFrameRate, drop_edl.nonDropFrameRate)
+            self.assertEqual(non_drop_edl.dropFrameRate, drop_edl.dropFrameRate)
+
+        for pal in self.PAL_rates:
+            pal_edl = EDL(pal)
+            self.assertEqual(pal, pal_edl.dropFrameRate)
+            self.assertEqual(pal, pal_edl.nonDropFrameRate)
 
     def test_output_matches_input(self):
         """testing if to_string will output the EDL as string

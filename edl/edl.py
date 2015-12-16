@@ -21,8 +21,13 @@ class EDL(object):
       string one of ['23.98', '24', '25', '29.97', '30', '50', '59.94', '60'].
       `fps` can not be skipped.
     """
+    _NTSC_non_drop_rates = ['24', '30', '60']
+    _NTSC_drop_rates = ['23.98', '29.97', '59.94']
+    _PAL_rates = ['25', '50']
+    _supported_framerates = _NTSC_non_drop_rates + _NTSC_drop_rates + _PAL_rates
 
-    _supported_framerates = ['23.98', '24', '25', '29.97', '30', '50', '59.94', '60']
+    _drop_to_nondrop = dict(zip(_NTSC_drop_rates, _NTSC_non_drop_rates))
+    _nondrop_to_drop = dict(zip(_NTSC_non_drop_rates, _NTSC_drop_rates))
 
     def __init__(self, fps):
         if not isinstance(fps, (basestring, int, float)):
@@ -93,6 +98,31 @@ class EDL(object):
                 #         break
 
         return edl
+
+    @property
+    def isPAL(self):
+        """Return True if assigned framerate is PAL"""
+        return self.fps in self._PAL_rates
+
+    @property
+    def isNTSC(self):
+        """Return True if assigned framerate is NTSC"""
+        return (self.fps in self._NTSC_drop_rates) or (self.fps in self._NTSC_non_drop_rates)
+
+    @property
+    def dropFrameRate(self):
+        """Return drop-frame equivalent of current framerate.
+        Returns current framerate if already drop-frame or if framerate is PAL.
+        """
+        return self._nondrop_to_drop[self.fps] if self.fps in self._NTSC_non_drop_rates else self.fps
+
+    @property
+    def nonDropFrameRate(self):
+        """Return non-drop-frame equivalent of current framerate.
+        Returns current framerate if already non-drop-frame or if framerate is
+        PAL.
+        """
+        return self._drop_to_nondrop[self.fps] if self.fps in self._NTSC_drop_rates else self.fps
 
     def get_start(self):
         start_tc = None
