@@ -1,4 +1,6 @@
 import unittest
+
+from edl import EDL
 from edl.event import Statement, Title, FrameCodeMode, StatementError
 
 
@@ -13,11 +15,14 @@ class BaseStatementTests(unittest.TestCase):
         list()
     ]
 
+    def setUp(self):
+        self.edl = EDL(24)
+
     def test_init_with_raw_text(self):
         """Verify Statements save their raw text
         """
         raw_text = "Test text"
-        statement = Statement(raw_text)
+        statement = Statement(self.edl, raw_text)
         self.assertEqual(raw_text, statement.raw)
         self.assertEqual(raw_text, str(statement))
 
@@ -25,7 +30,7 @@ class BaseStatementTests(unittest.TestCase):
         """Verify Statements reject invalid raw_text types
         """
         for invalid in self.invalid_raw_types:
-            self.assertRaises(TypeError, Statement, invalid)
+            self.assertRaises(TypeError, Statement, self.edl, invalid)
 
 
 class TitleStatementTests(unittest.TestCase):
@@ -79,22 +84,25 @@ class TitleStatementTests(unittest.TestCase):
         tuple(),
     ]
 
+    def setUp(self):
+        self.edl = EDL(24)
+
     def test_parse_valid_titles(self):
         """Verify that valid titles parse correctly"""
         for test_title in self.valid_raw_titles:
-            title = Title(test_title)
+            title = Title(self.edl, test_title)
             # Strip leading whitespace to avoid false negatives
             self.assertEqual(test_title.lstrip(' '), str(title))
 
     def test_parse_invalid_titles(self):
         """Verify that invalid titles raise StatementErrors"""
         for test_title in self.invalid_raw_titles:
-            self.assertRaises(StatementError, Title, test_title)
+            self.assertRaises(StatementError, Title, self.edl, test_title)
 
     def test_assign_valid_titles(self):
         """Verify that assigning valid titles works"""
         for test_title in self.valid_title_values:
-            title = Title()
+            title = Title(self.edl)
             title.title = test_title
             self.assertEqual(test_title, title.title)
 
@@ -109,7 +117,7 @@ class TitleStatementTests(unittest.TestCase):
                 expected_exc = ValueError
             else:
                 expected_exc = TypeError
-            title = Title()
+            title = Title(self.edl)
             self.assertRaises(expected_exc, assign_value, title, test_title)
 
 
@@ -150,6 +158,9 @@ class FrameCodeModeStatementTests(unittest.TestCase):
         "NON DROP FRAME"
     ]
 
+    def setUp(self):
+        self.edl = EDL(24)
+
     def test_parse_valid_fcm(self):
         """Verify that valid FCM statements parse correctly"""
         for test_fcm in self.valid_statements:
@@ -159,14 +170,14 @@ class FrameCodeModeStatementTests(unittest.TestCase):
             else:
                 expected_str = "FCM: NON DROP FRAME"
 
-            fcm = FrameCodeMode(test_fcm)
+            fcm = FrameCodeMode(self.edl, test_fcm)
             self.assertEqual(expected_value, fcm.isDropFrame)
             self.assertEqual(expected_str, str(fcm))
 
     def test_parse_invalid_fcm(self):
         """Verify that invalid FCM statements raise StatementErrors"""
         for test_fcm in self.invalid_statements:
-            self.assertRaises(StatementError, FrameCodeMode, test_fcm)
+            self.assertRaises(StatementError, FrameCodeMode, self.edl, test_fcm)
 
     def test_assign_valid_values(self):
         """Verify that assigning valid values works"""
@@ -175,7 +186,7 @@ class FrameCodeModeStatementTests(unittest.TestCase):
                 expected_str = "FCM: DROP FRAME"
             else:
                 expected_str = "FCM: NON DROP FRAME"
-            fcm = FrameCodeMode()
+            fcm = FrameCodeMode(self.edl)
             fcm.isDropFrame = test_fcm
 
             self.assertEqual(test_fcm, fcm.isDropFrame)
@@ -188,5 +199,5 @@ class FrameCodeModeStatementTests(unittest.TestCase):
             obj.isDropFrame = value
 
         for test_fcm in self.invalid_values:
-            fcm = FrameCodeMode()
+            fcm = FrameCodeMode(self.edl)
             self.assertRaises(TypeError, assign_value, fcm, test_fcm)

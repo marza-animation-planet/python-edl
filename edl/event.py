@@ -197,11 +197,18 @@ class Statement(object):
     _identifier = None
     _regex = None
 
-    def __init__(self, raw_text=None):
+    def __init__(self, edl, raw_text=None):
+        # Can't import EDL to do type checking here or it'd cause a circular
+        # dependency, so we'll just have to # trust users to be smart about
+        # things for now.
+
         if (raw_text is not None) and (not isinstance(raw_text, basestring)):
             raise TypeError("Raw statement data must be a string")
+
+        self._edl = edl
         self._prev_statement = None
         self._next_statement = None
+
         self._raw = raw_text
         # Don't call _parse in base init to prevent subclass overrides from
         # setting values in their super call, then stomping them with their
@@ -230,8 +237,8 @@ class Title(Statement):
     _identifier = "TITLE:"
     _regex = re.compile("TITLE:\s?(?P<title>.+)")
 
-    def __init__(self, raw_text=None):
-        super(Title, self).__init__(raw_text)
+    def __init__(self, edl, raw_text=None):
+        super(Title, self).__init__(edl, raw_text)
         self._title = None
 
         if self.raw:
@@ -272,8 +279,8 @@ class FrameCodeMode(Statement):
     DROP_FRAME = "DROP FRAME"
     NON_DROP_FRAME = "NON DROP FRAME"
 
-    def __init__(self, raw_text=None):
-        super(FrameCodeMode, self).__init__(raw_text)
+    def __init__(self, edl, raw_text=None):
+        super(FrameCodeMode, self).__init__(edl, raw_text)
         self._isDropFrame = False
 
         if self.raw:

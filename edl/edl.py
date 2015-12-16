@@ -87,7 +87,7 @@ class EDL(object):
         for line in data:
             line = line.rstrip('\n')  # Remove trailing newlines, usu. from files
             if line:  # Only spend cycles on lines with data
-                edl.events.append(Statement(line))
+                edl.events.append(Statement(edl, line))
                 # for m in matchers:
                 #     if m.apply(edl, line):
                 #         break
