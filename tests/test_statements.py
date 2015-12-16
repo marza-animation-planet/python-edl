@@ -129,7 +129,9 @@ class FrameCodeModeStatementTests(unittest.TestCase):
         "FCM: DROP FRAME",
         "FCM: NON DROP FRAME",
         " FCM:DROP FRAME ",
-        " FCM:  NON DROP FRAME"
+        " FCM:  NON DROP FRAME",
+        "FCM: NON-DROP FRAME",
+        " FCM:  NON-DROP FRAME"
     ]
 
     invalid_statements = [
@@ -141,6 +143,16 @@ class FrameCodeModeStatementTests(unittest.TestCase):
         "FCM: Drop Frame",
         "FCM: Non Drop Frame",
         "This is not an FCM statement",
+        # No spaces around NON-DROP's hyphen
+        "FCM: NON -DROP FRAME",
+        "FCM: NON - DROP FRAME",
+        "FCM: NON- DROP FRAME",
+        # Field values must have spaces
+        "FCM:DROPFRAME",
+        "FCM: DROPFRAME",
+        "FCM: NONDROP FRAME",
+        "FCM:NONDROPFRAME",
+        "FCM:NON DROPFRAME",
         # Ignoring next case for now, as we're able to parse it correctly, and
         # it will be corrected if we re-write the file.
         # "FCM: DROP FRAME  ."

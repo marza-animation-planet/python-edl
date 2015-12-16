@@ -275,7 +275,7 @@ class FrameCodeMode(Statement):
     """
 
     _identifier = "FCM:"
-    _regex = re.compile("FCM:(\s+)?(?P<mode>(?:NON\s)?DROP\sFRAME)")
+    _regex = re.compile("FCM:(\s+)?(?P<mode>(?:NON(\s|-))?DROP\sFRAME)")
     DROP_FRAME = "DROP FRAME"
     NON_DROP_FRAME = "NON DROP FRAME"
 
