@@ -33,7 +33,7 @@ class BaseStatementTests(unittest.TestCase):
             self.assertRaises(TypeError, Statement, self.edl, invalid)
 
 
-class TitleStatementTests(unittest.TestCase):
+class TitleTests(unittest.TestCase):
     """Test cases for Title Statement class
     """
     # "TITLE:" must be a single block, but other whitespacing doesn't really matter.
@@ -121,7 +121,7 @@ class TitleStatementTests(unittest.TestCase):
             self.assertRaises(expected_exc, assign_value, title, test_title)
 
 
-class FrameCodeModeStatementTests(unittest.TestCase):
+class FrameCodeModeTests(unittest.TestCase):
     """Test cases for Frame Code Mode Statement class
     """
 
@@ -203,7 +203,7 @@ class FrameCodeModeStatementTests(unittest.TestCase):
             self.assertRaises(TypeError, assign_value, fcm, test_fcm)
 
 
-class UserNoteStatementTests(unittest.TestCase):
+class UserNoteTests(unittest.TestCase):
 
     valid_notes = [
         "THIS IS A VALID NOTE",
