@@ -1,7 +1,7 @@
 import unittest
 
 from edl import EDL
-from edl.event import Statement, Title, FrameCodeMode, StatementError
+from edl.event import Statement, Title, FrameCodeMode, StatementError, UserNote
 
 
 class BaseStatementTests(unittest.TestCase):
@@ -129,9 +129,7 @@ class FrameCodeModeStatementTests(unittest.TestCase):
         "FCM: DROP FRAME",
         "FCM: NON DROP FRAME",
         " FCM:DROP FRAME ",
-        " FCM:  NON DROP FRAME",
-        "FCM: NON-DROP FRAME",
-        " FCM:  NON-DROP FRAME"
+        " FCM:  NON DROP FRAME"
     ]
 
     invalid_statements = [
@@ -143,16 +141,6 @@ class FrameCodeModeStatementTests(unittest.TestCase):
         "FCM: Drop Frame",
         "FCM: Non Drop Frame",
         "This is not an FCM statement",
-        # No spaces around NON-DROP's hyphen
-        "FCM: NON -DROP FRAME",
-        "FCM: NON - DROP FRAME",
-        "FCM: NON- DROP FRAME",
-        # Field values must have spaces
-        "FCM:DROPFRAME",
-        "FCM: DROPFRAME",
-        "FCM: NONDROP FRAME",
-        "FCM:NONDROPFRAME",
-        "FCM:NON DROPFRAME",
         # Ignoring next case for now, as we're able to parse it correctly, and
         # it will be corrected if we re-write the file.
         # "FCM: DROP FRAME  ."
@@ -213,3 +201,63 @@ class FrameCodeModeStatementTests(unittest.TestCase):
         for test_fcm in self.invalid_values:
             fcm = FrameCodeMode(self.edl)
             self.assertRaises(TypeError, assign_value, fcm, test_fcm)
+
+
+class UserNoteStatementTests(unittest.TestCase):
+
+    valid_notes = [
+        "THIS IS A VALID NOTE",
+        "  This Is Also A Valid Note",
+        "* THIS IS A VALID NOTE",
+        "Ev3n 7h15 G4rB4g3 15 571LL 4 v4L1D |\|073!"
+    ]
+
+    invalid_notes = [
+        "0 This is invalid because it starts with a digit",
+        " 1 Adding a leading space doesn't make it less wrong",
+    ]
+
+    # Dynamically generate invalid notes from Statement subclasses that define identifiers
+    for cls in Statement.__subclasses__():
+        if cls.identifier:
+            invalid_notes.append("{} is a Statement identifier and can't be a UserNote".format(cls.identifier))
+
+    def setUp(self):
+        self.edl = EDL(24)
+
+    def test_parse_valid_note(self):
+        """Verify that valid User Note statements parse correctly"""
+        for valid in self.valid_notes:
+            note = UserNote(self.edl, valid)
+            self.assertEqual(valid, note.note)
+            self.assertEqual(valid, str(note))
+
+    def test_parse_invalid_note(self):
+        """Verify that invalid FCM statements raise StatementErrors"""
+        for invalid in self.invalid_notes:
+            self.assertRaises(StatementError, UserNote, self.edl, invalid)
+
+    def test_assign_valid_values(self):
+        """Verify that assigning valid notes works"""
+        for valid in self.valid_notes:
+            note = UserNote(self.edl)
+            note.note = valid
+            self.assertEqual(valid, note.note)
+            self.assertEqual(valid, str(note))
+
+    def test_assign_invalid_values(self):
+        """Verify that assigning invalid notes raises correct exceptions"""
+        def assign_value(obj, value):
+            assert(isinstance(obj, UserNote))
+            obj.note = value
+
+        invalid_notes = self.invalid_notes + [None, 1234, 1234.1234, list(), dict(), tuple()]
+
+        for invalid in invalid_notes:
+            if isinstance(invalid, basestring):
+                expected_exc = StatementError
+            else:
+                expected_exc = TypeError
+
+            note = UserNote(self.edl)
+            self.assertRaises(expected_exc, assign_value, note, invalid)

@@ -194,7 +194,7 @@ class StatementError(Exception):
 class Statement(object):
     """Base class for Event statements
     """
-    _identifier = None
+    identifier = None
     _regex = None
 
     def __init__(self, edl, raw_text=None):
@@ -234,7 +234,7 @@ class Title(Statement):
     """A Title Statement as defined by the CMX standard.
     """
 
-    _identifier = "TITLE:"
+    identifier = "TITLE:"
     _regex = re.compile("TITLE:\s?(?P<title>.+)")
 
     def __init__(self, edl, raw_text=None):
@@ -245,7 +245,7 @@ class Title(Statement):
             self._parse(self.raw)
 
     def __str__(self):
-        return " ".join([self._identifier, self._title if self._title else ""])
+        return " ".join([self.identifier, self._title if self._title else ""])
 
     def _parse(self, raw_text):
         try:
@@ -274,8 +274,8 @@ class FrameCodeMode(Statement):
     """A Frame Code Mode (FCM) Statement as defined by the CMX standard.
     """
 
-    _identifier = "FCM:"
-    _regex = re.compile("FCM:(\s+)?(?P<mode>(?:NON(\s|-))?DROP\sFRAME)")
+    identifier = "FCM:"
+    _regex = re.compile("FCM:(\s+)?(?P<mode>(?:NON\s)?DROP\sFRAME)")
     DROP_FRAME = "DROP FRAME"
     NON_DROP_FRAME = "NON DROP FRAME"
 
@@ -287,7 +287,7 @@ class FrameCodeMode(Statement):
             self._parse(self.raw)
 
     def __str__(self):
-        return " ".join([self._identifier, self._field_text])
+        return " ".join([self.identifier, self._field_text])
 
     def _parse(self, raw_text):
         try:
@@ -308,3 +308,45 @@ class FrameCodeMode(Statement):
         if not isinstance(value, bool):
             raise TypeError("isDropFrame must be a bool")
         self._isDropFrame = value
+
+
+class UserNote(Statement):
+    """A User Note Statement as defined by the CMX standard.
+    """
+
+    def __init__(self, edl, raw_text=None):
+        super(UserNote, self).__init__(edl, raw_text)
+        self._note = None
+
+        if self.raw:
+            self._parse(self.raw)
+
+    def __str__(self):
+        return self._note
+
+    def _parse(self, raw_text):
+        # Strip any leading whitespace to check for Statement identifiers
+        stripped_text = raw_text.lstrip(' ')
+        # Special case: statements that start with a digit must be Standard Forms
+        if stripped_text[0].isdigit():
+            raise StatementError("Not a valid user note; must not start with a digit")
+        # Check that no pre-defined Statement identifiers are present
+        elif any(stripped_text.startswith(cls.identifier) for cls in
+                 self.__class__.__bases__[0].__subclasses__() if cls.identifier):
+            raise StatementError("Not a valid user note; must not start with reserved statement identifier")
+
+        # Save raw text, not stripped text, if valid to preserve user formatting
+        self._note = raw_text
+
+    @property
+    def note(self):
+        """Return user note text"""
+        return self._note
+
+    @note.setter
+    def note(self, value):
+        """Set user note text"""
+        if not isinstance(value, basestring):
+            raise TypeError("Note must be a string")
+        # Just reuse _parse since it already does the other validation and variable setting
+        self._parse(value)
