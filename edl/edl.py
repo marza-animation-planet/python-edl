@@ -1,5 +1,6 @@
 # import collections
 # import pprint
+from timecode import Framerate
 from .event import Event
 # from .matchers import TitleMatcher, EventMatcher, EffectMatcher, NameMatcher, \
 #     SourceMatcher, TimewarpMatcher, CommentMatcher
@@ -21,37 +22,9 @@ class EDL(object):
       string one of ['23.98', '24', '25', '29.97', '30', '50', '59.94', '60'].
       `fps` can not be skipped.
     """
-    _NTSC_non_drop_rates = ['24', '30', '60']
-    _NTSC_drop_rates = ['23.98', '29.97', '59.94']
-    _PAL_rates = ['25', '50']
-    _supported_framerates = _NTSC_non_drop_rates + _NTSC_drop_rates + _PAL_rates
-
-    _drop_to_nondrop = dict(zip(_NTSC_drop_rates, _NTSC_non_drop_rates))
-    _nondrop_to_drop = dict(zip(_NTSC_non_drop_rates, _NTSC_drop_rates))
 
     def __init__(self, fps):
-        if not isinstance(fps, (basestring, int, float)):
-            raise TypeError("Type {} not supported for fps".format(fps.__class__.__name__))
-
-        # Convert to float to make sure float strings will be accepted
-        if isinstance(fps, basestring):
-            try:
-                fps = float(fps)
-            except ValueError:
-                raise ValueError("{} is not a valid framerate".format(fps))
-
-        # Convert number types to strings for comparison. Reduces accidentally
-        # including invalid rates by floating-point rounding. Still some margin
-        # of error, but so small it should be safely ignorable.
-        if isinstance(fps, float):
-            fps = str(int(fps)) if fps.is_integer() else str(fps)
-        elif isinstance(fps, int):
-            fps = str(fps)
-
-        if fps not in self._supported_framerates:
-            raise ValueError("Framerate {} is not supported.".format(fps))
-
-        self.fps = fps
+        self.fps = Framerate(fps)
         self.events = []
         self.title = ''
 
@@ -102,19 +75,19 @@ class EDL(object):
     @property
     def isPAL(self):
         """Return True if assigned framerate is PAL"""
-        return self.fps in self._PAL_rates
+        return self.fps.isPAL
 
     @property
     def isNTSC(self):
         """Return True if assigned framerate is NTSC"""
-        return (self.fps in self._NTSC_drop_rates) or (self.fps in self._NTSC_non_drop_rates)
+        return self.fps.isNTSC
 
     @property
     def dropFrameRate(self):
         """Return drop-frame equivalent of current framerate.
         Returns current framerate if already drop-frame or if framerate is PAL.
         """
-        return self._nondrop_to_drop[self.fps] if self.fps in self._NTSC_non_drop_rates else self.fps
+        return self.fps.dropFrameRate
 
     @property
     def nonDropFrameRate(self):
@@ -122,7 +95,7 @@ class EDL(object):
         Returns current framerate if already non-drop-frame or if framerate is
         PAL.
         """
-        return self._drop_to_nondrop[self.fps] if self.fps in self._NTSC_drop_rates else self.fps
+        return self.fps.nonDropFrameRate
 
     def get_start(self):
         start_tc = None

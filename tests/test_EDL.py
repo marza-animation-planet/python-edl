@@ -5,13 +5,13 @@ import unittest
 from itertools import izip_longest
 from edl import EDL
 
-
 class EDLTestCase(unittest.TestCase):
     """tests the edl.edl.List class
     """
 
-    NTSC_non_drop_rates = ['24', '30', '60']
-    NTSC_drop_rates = ['23.98', '29.97', '59.94']
+    NTSC_non_drop_rates = ['30', '60']
+    NTSC_drop_rates = ['29.97', '59.94']
+    NTSC_prog_rates = ['23.98', '24']
     PAL_rates = ['25', '50']
 
     def test_init_valid_fps(self):
@@ -109,7 +109,7 @@ class EDLTestCase(unittest.TestCase):
 
         for pal in self.PAL_rates:
             pal_edl = EDL(pal)
-            self.assertEqual(pal, pal_edl.dropFrameRate)
+            self.assertIsNone(pal_edl.dropFrameRate)
             self.assertEqual(pal, pal_edl.nonDropFrameRate)
 
     def test_output_matches_input(self):
