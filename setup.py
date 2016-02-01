@@ -4,7 +4,7 @@ from distutils.core import setup
 import edl
 
 requires = [
-    'timecode>=3.0.1'
+    'timecode>=3.1.0'
 ]
 
 setup(
