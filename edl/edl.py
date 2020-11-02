@@ -47,7 +47,7 @@ class EDL(object):
             if start_tc is None:
                 start_tc = e.rec_start_tc
             else:
-                if e.rec_start_tc.frames < start_tc.frames:
+                if e.rec_start_tc < start_tc:
                     start_tc = e.rec_start_tc
         return start_tc
 
@@ -57,12 +57,12 @@ class EDL(object):
             if end_tc is None:
                 end_tc = e.rec_end_tc
             else:
-                if e.rec_end_tc.frames > end_tc.frames:
+                if e.rec_end_tc > end_tc:
                     end_tc = e.rec_end_tc
         return end_tc
 
     def get_length(self):
-        return self.get_end().frames - self.get_start().frames
+        return self.get_end().start_frame - self.get_start().start_frame
 
     def append(self, evt):
         self.events.append(evt)

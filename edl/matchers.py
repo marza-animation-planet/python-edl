@@ -1,6 +1,6 @@
 import re
 import sys
-import timecode
+import pyf.timecode
 from .effects import Timewarp, Cut, Dissolve, Wipe, Key
 from .event import Event
 
@@ -184,10 +184,10 @@ class EventMatcher(Matcher):
                 evt.transition = Key()
             else:
                 evt.transition = None
-            evt.src_start_tc = timecode.Timecode(self.fps, evt.src_start_tc)
-            evt.src_end_tc = timecode.Timecode(self.fps, evt.src_end_tc)
-            evt.rec_start_tc = timecode.Timecode(self.fps, evt.rec_start_tc)
-            evt.rec_end_tc = timecode.Timecode(self.fps, evt.rec_end_tc)
+            evt.src_start_tc = pyf.timecode.Timecode(pyf.timecode(evt.src_start_tc, self.fps), framerate=self.fps)
+            evt.src_end_tc = pyf.timecode.Timecode(pyf.timecode(evt.src_end_tc, self.fps), framerate=self.fps)
+            evt.rec_start_tc = pyf.timecode.Timecode(pyf.timecode(evt.rec_start_tc, self.fps), framerate=self.fps)
+            evt.rec_end_tc = pyf.timecode.Timecode(pyf.timecode(evt.rec_end_tc, self.fps), framerate=self.fps)
             stack.append(evt)
             return True
         else:

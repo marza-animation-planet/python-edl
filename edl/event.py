@@ -139,7 +139,7 @@ class Event(object):
     def rec_length(self):
         """Returns record length of event in frames before transition
         """
-        return self.rec_end_tc.frames - self.rec_start_tc.frames
+        return self.rec_end_tc.start_frame - self.rec_start_tc.start_frame
 
     def rec_length_with_transition(self):
         """Returns record length of event in frames including transition
@@ -149,7 +149,7 @@ class Event(object):
     def src_length(self):
         """Returns source length of event in frames before transition
         """
-        return self.src_end_tc.frames - self.src_start_tc.frames
+        return self.src_end_tc.start_frame - self.src_start_tc.start_frame
 
     def capture_from_tc(self):
         raise NotImplementedError
