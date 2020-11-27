@@ -184,10 +184,10 @@ class EventMatcher(Matcher):
                 evt.transition = Key()
             else:
                 evt.transition = None
-            evt.src_start_tc = pyf.timecode.Timecode(pyf.timecode.to_frame(evt.src_start_tc, self.fps), framerate=self.fps)
-            evt.src_end_tc = pyf.timecode.Timecode(pyf.timecode.to_frame(evt.src_end_tc, self.fps), framerate=self.fps)
-            evt.rec_start_tc = pyf.timecode.Timecode(pyf.timecode.to_frame(evt.rec_start_tc, self.fps), framerate=self.fps)
-            evt.rec_end_tc = pyf.timecode.Timecode(pyf.timecode.to_frame(evt.rec_end_tc, self.fps), framerate=self.fps)
+            evt.src_start_tc = pyf.timecode.Timecode(evt.src_start_tc, framerate=self.fps)
+            evt.src_end_tc = pyf.timecode.Timecode(evt.src_end_tc, framerate=self.fps)
+            evt.rec_start_tc = pyf.timecode.Timecode(evt.rec_start_tc, framerate=self.fps)
+            evt.rec_end_tc = pyf.timecode.Timecode(evt.rec_end_tc, framerate=self.fps)
             stack.append(evt)
             return True
         else:
